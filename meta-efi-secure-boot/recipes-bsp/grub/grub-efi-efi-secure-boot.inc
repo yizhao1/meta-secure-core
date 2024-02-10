@@ -8,12 +8,8 @@ EXTRA_SRC_URI = "\
 "
 
 GRUB_MOKVERIFY_PATCH = " \
-    file://0003-mok2verify-support-to-verify-non-PE-file-with-PKCS-7.patch \
-    file://0004-support-mok2-verify-in-multiboot2-protocol.patch \
-    file://0005-Verify-all-buffiles.patch \
-    file://0006-grub-efi-support-passing-a-buffer-to-be-verified.patch \
-    file://0007-kern-efi-init.c-disable-inside-lockdown-and-shim_loc.patch \
-    file://0008-efi-fallback-to-legacy-mode-if-mok2verify-is-loaded.patch \
+    file://0001-Add-MOK2-verifier.patch \
+    file://0002-mok2verify-use-grub_fatal-instead-of-grub_error.patch \
 "
 
 SRC_URI:append:class-target = " \
@@ -35,8 +31,6 @@ GRUB_SECURE_BOOT_MODULES += "${@'efivar password_pbkdf2 ' if d.getVar('UEFI_SB')
 
 GRUB_SIGNING_MODULES += "${@'pgp gcry_rsa gcry_sha256 gcry_sha512 --pubkey %s ' % d.getVar('GRUB_PUB_KEY') \
   if d.getVar('GRUB_SIGN_VERIFY') == '1' else ''}"
-
-GRUB_SELOADER_MODULES += "${@'mok2verify ' if d.getVar('UEFI_SELOADER') == '1' else ''}"
 
 GRUB_TPM_MODULES += "${@bb.utils.contains('DISTRO_FEATURES', 'tpm' , 'tpm', '', d)}"
 GRUB_TPM_MODULES += "${@bb.utils.contains('DISTRO_FEATURES', 'tpm2', 'tpm', '', d)}"

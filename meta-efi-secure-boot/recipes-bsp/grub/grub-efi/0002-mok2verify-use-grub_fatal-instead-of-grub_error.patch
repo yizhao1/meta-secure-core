@@ -1,0 +1,40 @@
+From 58763eb67dbe90775c9857a2bf8a9dfb90a09b62 Mon Sep 17 00:00:00 2001
+From: Yi Zhao <yi.zhao@windriver.com>
+Date: Sun, 18 Feb 2024 18:11:40 +0800
+Subject: [PATCH] mok2verify: use grub_fatal instead of grub_error
+
+When the file being verified is a configuration file (type ==
+GRUB_FILE_TYPE_CONFIG), read_config_file function returns the file
+descriptor by calling grub_file_open function. But grub_normal_execute
+function ignores all errors returned when calling read_config_file. So
+when some configuration files fail to be verified, such as password.inc
+and efi-secure-boot.inc, read_config_file returns NULL instead of file
+descriptor, causing grub to just not load these configuration files, but
+will not report an error.
+
+Use grub_fatal instead of grub_error to abort immediately if
+verification fails.
+
+Upstream-Status: Inappropriate [embedded specific]
+
+Signed-off-by: Yi Zhao <yi.zhao@windriver.com>
+---
+ grub-core/kern/efi/mok2verify.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/grub-core/kern/efi/mok2verify.c b/grub-core/kern/efi/mok2verify.c
+index 98402d8..abf3cc4 100644
+--- a/grub-core/kern/efi/mok2verify.c
++++ b/grub-core/kern/efi/mok2verify.c
+@@ -172,7 +172,7 @@ mok2_verifier_write (void *context, void *buf, grub_size_t size)
+   if (grub_errno == GRUB_ERR_NONE)
+     grub_dprintf ("mok2verify", "file %s verified\n", (char *) context);
+   else
+-    grub_error (grub_errno, N_("failed to verify file %s"), (char *) context);
++    grub_fatal (N_("failed to verify file %s"), (char *) context);
+ 
+ fail:
+   if (sigdata)
+-- 
+2.25.1
+
